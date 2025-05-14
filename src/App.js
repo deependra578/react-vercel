@@ -6,13 +6,21 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import AddTodoItem from './MyComponents/AddTodoItem';
 import About from './pages/About';
 import { Container } from 'react-bootstrap';
-import React, {useEffect} from 'react';
+import React, {use, useEffect} from 'react';
 import { fetchData, setAuthToken, postData, deleteData } from './utils/api';
+import { useState } from 'react';
 
 
 function App() {
 
-  setAuthToken('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZlNTQ0N2UwLTI2NzItNDM0MS1iYmFhLTBjMmQ4ZGQzN2RlMiIsImVtYWlsIjoidGVzdDJAZXhhbXBsZS5jb20iLCJpYXQiOjE3NDcxMjU1MjksImV4cCI6MTc0NzIxMTkyOX0._e3m6s43h99hA0jqL7bbz44py6HYg45_v_TzP3ML4Hc'); // Set the token if you have one
+const [authToken, setAuthTokenState] = useState(sessionStorage.getItem('authToken') || null);
+
+useEffect(() => {
+    if (authToken) {
+      setAuthToken(authToken);
+      console.log('Auth token set:', authToken);
+    }
+  }, [authToken]);
 
   // Fetching the data from the API
   fetchData('api/todos')
@@ -93,9 +101,28 @@ function App() {
     localStorage.setItem("todos", JSON.stringify(todos));
   }, [todos]);
 
+
+  const handleLogin = () => {
+    // Simulate login API call
+    postData('api/auth/login', { email: 'test2@example.com', password: 'password$578' })
+      .then(response => {
+        const token = response.token;
+        sessionStorage.setItem('authToken', token);
+        setAuthTokenState(token);
+      })
+      .catch(error => console.error('Error during login:', error));
+  }
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('authToken');
+    setAuthTokenState(null);
+    setTodos([]);
+  }
+
+
   return (
     <BrowserRouter>
-      <Header />
+      <Header onLogin={handleLogin} onLogout={handleLogout} isLoggedIn={!!authToken} />
       <Container className="my-4">
         <Routes>
           <Route path="/" element={

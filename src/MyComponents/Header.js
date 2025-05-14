@@ -4,7 +4,7 @@ import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import { Link } from "react-router-dom";
 
-export default function Header() {
+export default function Header({onLogin, onLogout, isLoggedIn}) {
   return (
     <Navbar bg="dark" data-bs-theme="dark" >
       <Container>
@@ -15,6 +15,17 @@ export default function Header() {
             <Nav.Link as={Link} to="/">Home</Nav.Link>
             <Nav.Link as={Link} to="/About">About</Nav.Link>
           </Nav>
+          <div className="d-flex">
+            {isLoggedIn ? (
+              <button className="btn btn-outline-light" onClick={onLogout}>
+                Logout
+              </button>
+            ) : (
+              <button className="btn btn-outline-light" onClick={onLogin}>
+                Login
+              </button>
+            )}
+          </div>
         </Navbar.Collapse>
       </Container>
     </Navbar>
