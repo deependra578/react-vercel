@@ -3,8 +3,16 @@ import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
-export default function Header({onLogin, onLogout, isLoggedIn}) {
+export default function Header({onLogout, isLoggedIn}) {
+
+  const navigate = useNavigate();
+
+  const handleLoginClick = () => {
+    navigate("/Login");
+  }
+
   return (
     <Navbar bg="dark" data-bs-theme="dark" >
       <Container>
@@ -21,7 +29,7 @@ export default function Header({onLogin, onLogout, isLoggedIn}) {
                 Logout
               </button>
             ) : (
-              <button className="btn btn-outline-light" onClick={onLogin}>
+              <button className="btn btn-outline-light" onClick={handleLoginClick}>
                 Login
               </button>
             )}

@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'https://task-manager-app-cnabhaf0ereceah8.centralus-01.azurewebsites.net/'; // Replace with your API base URL
+//const API_BASE_URL = 'https://task-manager-app-cnabhaf0ereceah8.centralus-01.azurewebsites.net/'; // Replace with your API base URL
+const API_BASE_URL = 'http://4.224.251.117:8080/'; // Replace with your API base URL
 
 // Create an Axios instance
 const apiClient = axios.create({

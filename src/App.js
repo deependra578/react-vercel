@@ -9,6 +9,7 @@ import { Container } from 'react-bootstrap';
 import React, {useEffect} from 'react';
 import { fetchData, setAuthToken, postData, deleteData } from './utils/api';
 import { useState } from 'react';
+import Login from './MyComponents/Login';
 
 
 function App() {
@@ -110,16 +111,19 @@ useEffect(() => {
   }
 
 
-  const handleLogin = () => {
-    // Simulate login API call
-    postData('api/auth/login', { email: 'test2@example.com', password: 'password$578' })
+  const handleLogin = async (email, password) => {
+
+      await postData('api/auth/login', { email: email, password: password })
       .then(response => {
         const token = response.token;
         sessionStorage.setItem('authToken', token);
         setAuthTokenState(token);
         fetchTodos();
       })
-      .catch(error => console.error('Error during login:', error));
+      .catch(error => {
+        console.error('Error logging in:', error);
+        throw error;
+      });
   }
 
   const handleLogout = () => {
@@ -131,8 +135,12 @@ useEffect(() => {
 
   return (
     <BrowserRouter>
-      <Header onLogin={handleLogin} onLogout={handleLogout} isLoggedIn={!!authToken} />
-      { authToken ? <Container className="my-4">
+      <Header 
+        onLogin={() => {}} 
+        onLogout={handleLogout} 
+        isLoggedIn={!!authToken} />
+
+      <Container className="my-4">
         <Routes>
           <Route path="/" element={
             <>
@@ -141,10 +149,9 @@ useEffect(() => {
             </>
           } />
           <Route path="/about" element={<About />} />
+          <Route path="/Login" element={<Login onLogin={handleLogin} />} />
         </Routes>
-      </Container> : <Container className="my-4">
-        <h2 className='my-4'>Please login to manage your todos</h2>
-      </Container> }
+      </Container> 
 
       <Footer />
     </BrowserRouter>
