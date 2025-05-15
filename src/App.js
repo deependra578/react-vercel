@@ -6,13 +6,16 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import AddTodoItem from './MyComponents/AddTodoItem';
 import About from './pages/About';
 import { Container } from 'react-bootstrap';
-import React, {use, useEffect} from 'react';
+import React, {useEffect} from 'react';
 import { fetchData, setAuthToken, postData, deleteData } from './utils/api';
 import { useState } from 'react';
 
 
 function App() {
 
+// Initializing the localstorage
+const [todos, setTodos] = React.useState([]);
+const [loadingId, setLoadingId] = React.useState(null);  
 const [authToken, setAuthTokenState] = useState(sessionStorage.getItem('authToken') || null);
 
 useEffect(() => {
@@ -22,34 +25,42 @@ useEffect(() => {
     }
   }, [authToken]);
 
-  // Fetching the data from the API
-  fetchData('api/todos')
-    .then(data => {
-      console.log('Data fetched from API:', data);
 
-      // Parse the data in object format
-      const parsedData = data.data.todos.map(item => ({
-        id: item.id,
-        text: item.title,
-        description: item.description,
-        completed: false,
-      }));
-      // Set the data to local storage
-      localStorage.setItem('todos', JSON.stringify(parsedData));
+  const fetchTodos = () => {
+    // Fetching the data from the API
+      fetchData('api/todos')
+        .then(data => {
+          console.log('Data fetched from API:', data);
 
-      console.log('Fetched data:', data);
-    })
-    .catch(error => {
-      console.error('Error fetching data:', error);
-    });
+          // Parse the data in object format
+          const parsedData = data.data.todos.map(item => ({
+            id: item.id,
+            text: item.title,
+            description: item.description,
+            completed: false,
+          }));
+          // Set the data to local storage
+          setTodos(parsedData);
+          console.log('Fetched data:', data);
+        })
+        .catch(error => {
+          console.error('Error fetching data:', error);
+        });
+  }
 
-  // Initializing the localstorage
-   const [todos, setTodos] = React.useState(JSON.parse(localStorage.getItem("todos")) || []);
-   const [loadingId, setLoadingId] = React.useState(null);
+
+  useEffect(() => {
+    const token = sessionStorage.getItem('authToken');
+    if (token) {
+      setAuthToken(token);
+      console.log('Auth token set:', token);
+      fetchTodos();
+      
+    }}, []); // Empty dependency array to run only once on mount
+
+  
   
   const addTodo = (todo) => {
-    
-
     const postobject = {      
       title: todo.text,
       description: todo.description
@@ -61,18 +72,19 @@ useEffect(() => {
 
         const newTodo = {
           id: response.data.todo.id,
-          text: todo.title,
+          text: todo.text,
           description: todo.description,
           completed: false,
         };
+
+        console.log('New todo:', newTodo);
+        console.log('Todos before adding:', todos);
 
         setTodos([...todos, newTodo]);
       })
       .catch(error => {
         console.error('Error posting data:', error);
       });
-
-   
   }
   
   const deleteTodo = (id) => {
@@ -97,10 +109,6 @@ useEffect(() => {
       });
   }
 
-  useEffect(() => {
-    localStorage.setItem("todos", JSON.stringify(todos));
-  }, [todos]);
-
 
   const handleLogin = () => {
     // Simulate login API call
@@ -109,6 +117,7 @@ useEffect(() => {
         const token = response.token;
         sessionStorage.setItem('authToken', token);
         setAuthTokenState(token);
+        fetchTodos();
       })
       .catch(error => console.error('Error during login:', error));
   }
@@ -123,7 +132,7 @@ useEffect(() => {
   return (
     <BrowserRouter>
       <Header onLogin={handleLogin} onLogout={handleLogout} isLoggedIn={!!authToken} />
-      <Container className="my-4">
+      { authToken ? <Container className="my-4">
         <Routes>
           <Route path="/" element={
             <>
@@ -133,7 +142,10 @@ useEffect(() => {
           } />
           <Route path="/about" element={<About />} />
         </Routes>
-      </Container>
+      </Container> : <Container className="my-4">
+        <h2 className='my-4'>Please login to manage your todos</h2>
+      </Container> }
+
       <Footer />
     </BrowserRouter>
     
